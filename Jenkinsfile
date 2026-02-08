@@ -56,6 +56,14 @@ pipeline {
             }
         }
 
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }        
+
 
         stage('Build App Image') {
             steps {
@@ -85,7 +93,7 @@ pipeline {
         stage('Kubernetes Deploy') {
           agent {label 'KOPS'}
           steps {
-            sh "sudo helm upgrade --install --force-replace vprofile-stack helm/vprofilecharts --set appimage=${registry}:V${BUILD_NUMBER} --namespace prod"
+            sh "sudo helm upgrade --install --server-side vprofile-stack helm/vprofilecharts --set appimage=${registry}:V${BUILD_NUMBER} --namespace prod"
           }
         }
 
